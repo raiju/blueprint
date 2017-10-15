@@ -12,6 +12,7 @@ import * as React from "react";
 import * as Classes from "../common/classes";
 import * as Errors from "../common/errors";
 import { Grid } from "../common/grid";
+import { ENABLE_DEFERRED } from "../global";
 
 export enum QuadrantType {
     /**
@@ -122,7 +123,34 @@ export class TableQuadrant extends AbstractComponent<ITableQuadrantProps, {}> {
         isRowHeaderShown: true,
     };
 
+    private isForceUpdate = false;
+    private hasRenderRequest = false;
+    private prev: any = null;
     public render() {
+        if (!ENABLE_DEFERRED) {
+            return this.realRender();
+        } else {
+            if (this.prev === null) {
+                this.prev = this.realRender();
+                return this.prev;
+            }
+            if (!this.isForceUpdate) {
+                this.hasRenderRequest = true;
+                requestAnimationFrame(() => {
+                    this.prev = this.realRender();
+                    requestAnimationFrame(() => {
+                        this.hasRenderRequest = false;
+                        this.isForceUpdate = true;
+                        this.forceUpdate();
+                    });
+                });
+            }
+            this.isForceUpdate = false;
+            return this.prev;
+        }
+    }
+
+    public realRender() {
         const { grid, isRowHeaderShown, quadrantType, renderBody } = this.props;
 
         const showFrozenRowsOnly = quadrantType === QuadrantType.TOP || quadrantType === QuadrantType.TOP_LEFT;

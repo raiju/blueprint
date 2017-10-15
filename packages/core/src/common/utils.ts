@@ -158,9 +158,7 @@ export function throttleReactEventCallback(
             // reference it
             event2.persist();
         },
-        (event2: React.SyntheticEvent<any>, ...otherArgs2: any[]) => {
-            callback(event2, ...otherArgs2);
-        },
+        callback,
     );
     return throttledFunc;
 }

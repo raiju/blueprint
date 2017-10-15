@@ -16,6 +16,7 @@ import { BlueprintDocs } from "./components/blueprintDocs";
 import { IPackageInfo } from "./components/navbarActions";
 import * as ReactDocs from "./tags/reactDocs";
 import { reactExamples } from "./tags/reactExamples";
+import { TableSortableExample } from "../../table/examples/tableSortableExample";
 
 /* tslint:disable:no-var-requires */
 const docs = require<IDocsData>("./generated/docs.json");
@@ -30,7 +31,7 @@ const versions = require<string[]>("./generated/versions.json").map(version => (
     version,
 }));
 /* tslint:enable:no-var-requires */
-
+/*
 const reactDocs = new ReactDocsTagRenderer(ReactDocs as any);
 const reactExample = new ReactExampleTagRenderer(reactExamples);
 
@@ -42,5 +43,11 @@ const tagRenderers = {
 
 ReactDOM.render(
     <BlueprintDocs {...{ docs, tagRenderers, releases, versions }} defaultPageId="blueprint" />,
+    document.query("#blueprint-documentation"),
+);
+*/
+
+ReactDOM.render(
+    <div style={{height: "100vh", width: "100vw"}}><TableSortableExample id="123" themeName="light" /></div>,
     document.query("#blueprint-documentation"),
 );

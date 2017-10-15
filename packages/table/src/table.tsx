@@ -45,6 +45,7 @@ import {
     TableLoadingOption,
 } from "./regions";
 import { TableBody } from "./tableBody";
+import { ENABLE_DEFERRED } from "./global";
 
 export interface ITableProps extends IProps, IRowHeights, IColumnWidths {
     /**
@@ -1971,7 +1972,10 @@ export class Table extends AbstractComponent<ITableProps, ITableState> {
             .setNumFrozenColumns(this.state.numFrozenColumnsClamped);
     }
 
-    private updateViewportRect = (nextViewportRect: Rect) => {
+    private nextViewport: Rect = null;
+    private viewportUpdateScheduled = false;
+
+    private updateViewportRectNow = (nextViewportRect: Rect) => {
         this.setState({ viewportRect: nextViewportRect });
 
         const { viewportRect } = this.state;
@@ -1982,6 +1986,24 @@ export class Table extends AbstractComponent<ITableProps, ITableState> {
 
         if (didViewportChange) {
             this.invokeOnVisibleCellsChangeCallback(nextViewportRect);
+        }
+    };
+
+    private updateViewportRect = (nextViewportRect: Rect) => {
+        if (!ENABLE_DEFERRED || this.state.viewportRect === null || this.nextViewport === null) {
+            this.updateViewportRectNow(nextViewportRect);
+            return;
+        }
+
+        this.nextViewport = nextViewportRect;
+
+        if (!this.viewportUpdateScheduled) {
+            this.viewportUpdateScheduled = true;
+            requestAnimationFrame(() => {
+                this.viewportUpdateScheduled = false;
+
+                this.updateViewportRectNow(this.nextViewport);
+            });
         }
     };
 
